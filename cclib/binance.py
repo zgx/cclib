@@ -366,6 +366,32 @@ class BinanceFApi(BinanceApiBase):
         if limit:
             params['limit'] = limit
         return self.request('GET', query_path, params)
+    
+    def get_open_interest_hist(self, symbol: str = None, period: str = None, limit: int = None, start_time: datetime = None, end_time: datetime = None):
+        """
+        获取持仓量信息
+        :param symbol: 交易对
+        :param period: 时间周期
+        :param limit: 默认值 30, 最大值 500
+        :param start_time: 开始时间
+        :param end_time: 结束时间
+        :return:
+        """
+        query_path = '/futures/data/openInterestHist'
+        params = {}
+        if symbol:
+            params['symbol'] = symbol
+        if period:
+            params['period'] = period
+        if limit:
+            params['limit'] = limit
+        if start_time:
+            start_ts = int(start_time.timestamp() * 1000)
+            params['startTime'] = start_ts
+        if end_time:
+            end_ts = int(end_time.timestamp() * 1000)
+            params['endTime'] = end_ts
+        return self.request('GET', query_path, params)
 
     def get_account_balance(self):
         """
