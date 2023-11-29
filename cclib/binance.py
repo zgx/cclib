@@ -139,6 +139,19 @@ class BinanceSApi(BinanceApiBase):
     def get_exchange_info(self):
         query_path = "/api/v3/exchangeInfo"
         return self._get(query_path)
+    
+    def get_ticker_price(self, symbol: str=None):
+        """
+        获取最新价格
+        :param symbol: 不发送交易对参数，则会返回所有交易对信息
+        :return: 当发送交易对参数时，返回的结果为单个symbol的最新价格；当未发送交易对参数时，返回的结果为列表
+
+        """
+        query_path = "/api/v3/ticker/price"
+        params = {}
+        if symbol:
+            params['symbol'] = symbol
+        return self._get(query_path, params)
 
     def get_candle(self, symbol, start_time: Union[datetime, None], end_time: Union[datetime, None],limit=1000, interval='1m'):
         """
@@ -335,6 +348,20 @@ class BinanceFApi(BinanceApiBase):
         query_path = "/fapi/v1/exchangeInfo"
         return self._get(query_path)
     
+    def get_ticker_price(self, symbol: str=None):
+        """
+        获取最新价格
+        :param symbol: 不发送交易对参数，则会返回所有交易对信息
+        :return: 当发送交易对参数时，返回的结果为单个symbol的最新价格；当未发送交易对参数时，返回的结果为列表
+
+        """
+        query_path = "/fapi/v2/ticker/price"
+        params = {}
+        if symbol:
+            params['symbol'] = symbol
+        return self._get(query_path, params)
+
+    
     def get_candle(self, symbol, start_time: datetime, end_time: datetime, limit=None, interval='1m'):
         """
         获取一分钟K线列表，获取区间为: [start_time, end_time]
@@ -519,6 +546,19 @@ class BinanceDApi(BinanceApiBase):
     def get_exchange_info(self):
         query_path = "/dapi/v1/exchangeInfo"
         return self._get(query_path)
+    
+    def get_ticker_price(self, symbol: str=None):
+        """
+        获取最新价格
+        :param symbol: 不发送交易对参数，则会返回所有交易对信息
+        :return: 当发送交易对参数时，返回的结果为单个symbol的最新价格；当未发送交易对参数时，返回的结果为列表
+
+        """
+        query_path = "/dapi/v1/ticker/price"
+        params = {}
+        if symbol:
+            params['symbol'] = symbol
+        return self._get(query_path, params)
 
     def get_candle(self, symbol, start_time: datetime, end_time: datetime, limit=None, interval='1m'):
         """
