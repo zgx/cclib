@@ -559,6 +559,29 @@ class OkexApi(OkexApiBase):
         params = {"fromCcy": from_ccy, "toCcy": to_ccy}
         return self.request('POST', uri, body=params, auth=True)
 
+    def get_leverage_info(self, inst_id, mgn_mode="cross"):
+        """
+        获取杠杆倍数
+        :param inst_id:
+        :param mgn_mode:
+        :return:
+        """
+        uri = "/api/v5/account/leverage-info"
+        params = {"instId": inst_id, "mgnMode": mgn_mode}
+        return self.request('GET', uri, params, auth=True)
+
+    def set_leverage(self, inst_id, lever, mgn_mode="cross"):
+        """
+        设置杠杆倍数
+        :param inst_id:
+        :param lever: 杠杆倍数
+        :param mgn_mode:
+        :return:
+        """
+        uri = "/api/v5/account/set-leverage"
+        params = {"instId": inst_id, "lever": str(lever), "mgnMode": mgn_mode}
+        return self.request('POST', uri, body=params, auth=True)
+
 
 class OkexV3FuturesApi(OkexApiBase):
 

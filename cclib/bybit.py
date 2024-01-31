@@ -239,7 +239,7 @@ class BybitV5Api:
         uri = "/v5/market/time"
         return self.request('GET', uri)
     
-    def get_candle(self, symbol, category=None, interval="1", 
+    def get_candle(self, symbol, category, interval="1", 
                    start_time: Optional[datetime.datetime]=None, end_time: Optional[datetime.datetime]=None, 
                    limit=None):
         """
