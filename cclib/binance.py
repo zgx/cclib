@@ -567,6 +567,31 @@ class BinanceDApi(BinanceApiBase):
         query_path = '/dapi/v1/klines'
         return self._get_candle(query_path, symbol, start_time, end_time, limit, interval)
 
+    def get_funding_rate(self, symbol: str = None, start_time: datetime = None, end_time: datetime = None, limit = None):
+        """
+        查询资金费率历史。
+        如果 startTime 和 endTime 都未发送, 返回最近 limit 条数据.
+        如果 startTime 和 endTime 之间的数据量大于 limit, 返回 startTime + limit情况下的数据。
+        :param symbol:
+        :param start_time:
+        :param end_time:
+        :param limit: 默认值 100，最大值 1000
+        :return:
+        """
+        query_path = '/dapi/v1/fundingRate'
+        params = {}
+        if symbol:
+            params['symbol'] = symbol
+        if start_time:
+            start_ts = int(start_time.timestamp() * 1000)
+            params['startTime'] = start_ts
+        if end_time:
+            end_ts = int(end_time.timestamp() * 1000)
+            params['endTime'] = end_ts
+        if limit:
+            params['limit'] = limit
+        return self.request('GET', query_path, params)
+
     def get_account_balance(self):
         """
         获取账户余额

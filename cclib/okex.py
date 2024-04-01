@@ -504,6 +504,47 @@ class OkexApi(OkexApiBase):
         params = {'type': query_type}
         return self.request('GET', uri, params, auth=True)
 
+    def send_order(self, inst_id, td_mode, side, ord_type, sz, ccy=None, cl_ord_id=None, tag=None, px=None, reduce_only=None, tgtCcy=None, posSide=None, triggerPx=None, ordId=None):
+        """
+        下单
+        :param inst_id:
+        :param td_mode:
+        :param side:
+        :param ord_type:
+        :param sz:
+        :param ccy:
+        :param cl_ord_id:
+        :param tag:
+        :param px:
+        :param reduce_only:
+        :param tgtCcy:
+        :param posSide:
+        :param triggerPx:
+        :param ordId:
+        :return:
+        """
+        uri = "/api/v5/trade/order"
+        params = {"instId": inst_id, "tdMode": td_mode, "side": side, "ordType": ord_type, "sz": sz}
+        if ccy:
+            params['ccy'] = ccy
+        if cl_ord_id:
+            params['clOrdId'] = cl_ord_id
+        if tag:
+            params['tag'] = tag
+        if px:
+            params['px'] = px
+        if reduce_only:
+            params['reduceOnly'] = reduce_only
+        if tgtCcy:
+            params['tgtCcy'] = tgtCcy
+        if posSide:
+            params['posSide'] = posSide
+        if triggerPx:
+            params['triggerPx'] = triggerPx
+        if ordId:
+            params['ordId'] = ordId
+        return self.request('POST', uri, body=params, auth=True)
+
     def amend_order(self, order_id, new_size, new_price=None):
         """
         修改订单
