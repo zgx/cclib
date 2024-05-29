@@ -70,3 +70,7 @@ class ResponseError(BaseError):
 #使用json解释相应结果出错
 class ParseJsonError(ResponseError):
     pass
+
+
+class InvalidMethod(BaseError):
+    pass
