@@ -67,7 +67,7 @@ class BackpackApi:
         data = urllib.parse.urlencode(data)
         return hmac.new(self.secret_key.encode(), data.encode(), hashlib.sha256).hexdigest()
 
-    def request(self, method: str, path: str, params: dict = None, data: dict = None, headers: dict = None, auth=False, timeout: int = 10) -> dict | list:
+    def request(self, method: str, path: str, params: dict = None, data: dict = None, headers: dict = None, auth=False, timeout: int = 10) -> Union[dict, list]:
         if params is None:
             params = {}
         if data is None:
