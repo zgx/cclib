@@ -623,6 +623,57 @@ class OkexApi(OkexApiBase):
         params = {"instId": inst_id, "lever": str(lever), "mgnMode": mgn_mode}
         return self.request('POST', uri, body=params, auth=True)
 
+    def get_fixed_loan_borrowing_orders(self, order_id=None, ccy=None, state=None, limit=100):
+        """
+        获取固定借币订单信息
+        :param order_id:
+        :param ccy:
+        :param state:
+        :param limit:
+        :return:
+        """
+        uri = "/api/v5/account/fixed-loan/borrowing-orders-list"
+        params = {}
+        if order_id:
+            params['ordId'] = order_id
+        if ccy:
+            params['ccy'] = ccy
+        if state:
+            params['state'] = state
+        if limit:
+            params['limit'] = limit
+        return self.request('GET', uri, params, auth=True)
+
+    def fixed_loan_manual_borrowing(self, order_id):
+        """
+        固定借币手动借币
+        :param order_id:
+        :return:
+        """
+        uri = "/api/v5/account/fixed-loan/manual-reborrow"
+        params = {"ordId": order_id}
+        return self.request('POST', uri, body=params, auth=True)
+
+    def fixed_loan_repay_borrowing_order(self, order_id):
+        """
+        固定借币手动还币
+        :param order_id:
+        :return:
+        """
+        uri = "/api/v5/account/fixed-loan/repay-borrowing-order"
+        params = {"ordId": order_id}
+        return self.request('POST', uri, body=params, auth=True)
+
+    def fixed_loan_convert_to_market_loan(self, order_id):
+        """
+        固定借币转市场借币
+        :param order_id:
+        :return:
+        """
+        uri = "/api/v5/account/fixed-loan/convert-to-market-loan"
+        params = {"ordId": order_id}
+        return self.request('POST', uri, body=params, auth=True)
+
 
 class OkexV3FuturesApi(OkexApiBase):
 
