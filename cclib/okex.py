@@ -580,6 +580,10 @@ class OkexApi(OkexApiBase):
             params['subType'] = sub_type
         return self.request('GET', uri, params, auth=True)
 
+    def get_account_config(self):
+        uri = "/api/v5/account/config"
+        return self.request('GET', uri, {}, auth=True)
+
     def get_easy_convert_assets(self):
         """
         获取小币一键兑换主流币币种列表。仅可兑换余额在 $10 以下小币币种。
