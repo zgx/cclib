@@ -256,6 +256,38 @@ class BinanceSApi(BinanceApiBase):
             params['symbol'] = symbol
         return self.request('GET', uri, params, auth=True)
 
+    def create_order(self, symbol, side, order_type, quantity=None, quote_order_qty=None, price=None, time_in_force=None, new_client_order_id=None):
+        """
+        创建订单
+        :param symbol: 交易对
+        :param side: BUY/SELL
+        :param order_type: LIMIT, MARKET, STOP_LOSS, STOP_LOSS_LIMIT, TAKE_PROFIT, TAKE_PROFIT_LIMIT, LIMIT_MAKER
+        :param quantity: 数量
+        :param quote_order_qty: 报价订单数量(仅适用于MARKET订单)
+        :param price: 价格
+        :param time_in_force: GTC, IOC, FOK
+        :param new_client_order_id:
+        :return:
+        """
+        uri = "/api/v3/order"
+        params = {
+            'symbol': symbol,
+            'side': side,
+            'type': order_type,
+        }
+        if quantity:
+            params['quantity'] = quantity
+        if quote_order_qty:
+            params['quoteOrderQty'] = quote_order_qty
+        if price:
+            params['price'] = price
+        if time_in_force:
+            params['timeInForce'] = time_in_force
+        if new_client_order_id:
+            params['newClientOrderId'] = new_client_order_id
+
+        return self.request('POST', uri, params, auth=True)
+
     def get_margin_pairs(self):
         uri = "/sapi/v1/margin/allPairs"
         return self.request('GET', uri, None, auth=True)
