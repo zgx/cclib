@@ -728,102 +728,58 @@ class BinancePApi(BinanceApiBase):
 
     def um_set_position_mode(self, dualSidePosition: bool):
         """
-        统一账户 U本位合约设置持仓模式
+        U本位合约设置持仓模式
+        :param dualSidePosition:
+        :return:
         """
         uri = "/papi/v1/um/positionSide/dual"
-        params = {"dualSidePosition": str(dualSidePosition).lower()}
-        return self.request("POST", uri, params, auth=True)
+        params = {
+            "dualSidePosition": str(dualSidePosition).lower()
+        }
+        return self.request("POST", uri, params=params, auth=True)
 
     def um_set_leverage(self, symbol, leverage):
         """
-        统一账户 U本位合约设置杠杆
+        U本位合约设置杠杆
+        :param symbol:
+        :param leverage:
+        :return:
         """
         uri = "/papi/v1/um/leverage"
         params = {"symbol": symbol, "leverage": leverage}
-        return self.request("POST", uri, params, auth=True)
-
-    # --------- CM (币本位合约) ---------
-    def cm_create_order(self, symbol, side, type_, quantity, price=None, positionSide=None, reduceOnly=None, timeInForce=None, clientOrderId=None, **kwargs):
-        """
-        统一账户 币本位合约下单
-        """
-        uri = "/papi/v1/cm/order"
-        params = {
-            "symbol": symbol,
-            "side": side,
-            "type": type_,
-            "quantity": quantity
-        }
-        if price is not None:
-            params["price"] = price
-        if positionSide is not None:
-            params["positionSide"] = positionSide
-        if reduceOnly is not None:
-            params["reduceOnly"] = reduceOnly
-        if timeInForce is not None:
-            params["timeInForce"] = timeInForce
-        if clientOrderId is not None:
-            params["newClientOrderId"] = clientOrderId
-        params.update(kwargs)
-        return self.request("POST", uri, params, auth=True)
-
-    def cm_cancel_order(self, symbol, orderId=None, origClientOrderId=None):
-        """
-        统一账户 币本位合约撤单
-        """
-        uri = "/papi/v1/cm/order"
-        params = {"symbol": symbol}
-        if orderId is not None:
-            params["orderId"] = orderId
-        if origClientOrderId is not None:
-            params["origClientOrderId"] = origClientOrderId
-        return self.request("DELETE", uri, params, auth=True)
-
-    def cm_set_position_mode(self, dualSidePosition: bool):
-        """
-        统一账户 币本位合约设置持仓模式
-        """
-        uri = "/papi/v1/cm/positionSide/dual"
-        params = {"dualSidePosition": str(dualSidePosition).lower()}
-        return self.request("POST", uri, params, auth=True)
+        return self.request("POST", uri, params=params, auth=True)
 
     def cm_set_leverage(self, symbol, leverage):
         """
-        统一账户 币本位合约设置杠杆
+        币本位合约设置杠杆
+        :param symbol:
+        :param leverage:
+        :return:
         """
         uri = "/papi/v1/cm/leverage"
         params = {"symbol": symbol, "leverage": leverage}
-        return self.request("POST", uri, params, auth=True)
+        return self.request("POST", uri, params=params, auth=True)
 
-    # --------- Margin (杠杆) ---------
-    def margin_create_order(self, symbol, side, type_, quantity, price=None, timeInForce=None, clientOrderId=None, **kwargs):
+    def get_um_position(self, symbol=None):
         """
-        统一账户 杠杆下单
+        U本位合约持仓信息
+        :param symbol:
+        :return:
         """
-        uri = "/papi/v1/margin/order"
-        params = {
-            "symbol": symbol,
-            "side": side,
-            "type": type_,
-            "quantity": quantity
-        }
-        if price is not None:
-            params["price"] = price
-        if timeInForce is not None:
-            params["timeInForce"] = timeInForce
-        if clientOrderId is not None:
-            params["newClientOrderId"] = clientOrderId
-        params.update(kwargs)
-        return self.request("POST", uri, params, auth=True)
+        uri = "/papi/v1/um/positionRisk"
+        params = {}
+        if symbol:
+            params['symbol'] = symbol
+        return self.request("GET", uri, params, auth=True)
 
-    def margin_cancel_order(self, symbol, orderId=None, origClientOrderId=None):
+    def get_cm_position(self, symbol=None):
         """
-        统一账户 杠杆撤单
+        币本位合约持仓信息
+        :param symbol:
+        :return:
         """
-        uri = "/papi/v1/margin/order"
-        params = {"symbol": symbol}
-        if orderId is not None:
-            params["orderId"] = orderId
-        if origClientOrderId is not None:
-            params["origClientOrderId"] = origClientOrderId
-        return self.request("DELETE", uri, params, auth=True)
+        uri = "/papi/v1/cm/positionRisk"
+        params = {}
+        if symbol:
+            params['symbol'] = symbol
+        return self.request("GET", uri, params, auth=True)
