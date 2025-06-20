@@ -783,3 +783,18 @@ class BinancePApi(BinanceApiBase):
         if symbol:
             params['symbol'] = symbol
         return self.request("GET", uri, params, auth=True)
+
+    def get_um_account_detail(self):
+        """
+        获取U本位合约账户详情
+        """
+        uri = "/papi/v1/um/account"
+        return self.request("GET", uri, auth=True)
+
+    def get_cm_account_detail(self):
+        """
+        获取币本位合约账户详情
+        """
+        uri = "/papi/v1/cm/account"
+        return self.request("GET", uri, auth=True)
+
