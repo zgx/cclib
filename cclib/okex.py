@@ -677,6 +677,25 @@ class OkexApi(OkexApiBase):
         uri = "/api/v5/account/fixed-loan/convert-to-market-loan"
         params = {"ordId": order_id}
         return self.request('POST', uri, body=params, auth=True)
+    
+    def set_auto_earn(self, ccy: str, action: str, apr: str = None):
+        """
+        设置自动赚币功能，开启/关闭/修改最低年化收益率。
+        :param ccy: 币种
+        :param action: 操作类型 turn_on/turn_off/amend
+        :param apr: 最低年化收益率（仅 turn_on/amend 时必填）
+        :return:
+        """
+        uri = "/api/v5/account/set-auto-earn"
+        params = {
+            "ccy": ccy,
+            "action": action
+        }
+        if action in ["turn_on", "amend"]:
+            if apr is None:
+                raise ValueError("apr 参数在 turn_on 或 amend 操作时必须提供")
+            params["apr"] = apr
+        return self.request("POST", uri, body=params, auth=True)
 
 
 class OkexV3FuturesApi(OkexApiBase):
