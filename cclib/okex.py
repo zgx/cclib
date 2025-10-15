@@ -456,9 +456,43 @@ class OkexApi(OkexApiBase):
             params['after'] = ts_to
         return self._get(query_path, params)
 
-    def get_orders_history(self, inst_type):
+    def get_orders_history(self, inst_type, inst_family=None, inst_id=None, ord_type=None, state=None,
+                           category=None, after=None, before=None, begin=None, end=None, limit=None):
+        """获取最近7天的历史订单记录。"""
         uri = "/api/v5/trade/orders-history"
         params = {"instType": inst_type}
+
+        if inst_family:
+            params["instFamily"] = inst_family
+        if inst_id:
+            params["instId"] = inst_id
+        if ord_type:
+            if isinstance(ord_type, (list, tuple, set)):
+                params["ordType"] = ','.join(str(item) for item in ord_type)
+            else:
+                params["ordType"] = ord_type
+        if state:
+            params["state"] = state
+        if category:
+            params["category"] = category
+        if after:
+            params["after"] = str(after)
+        if before:
+            params["before"] = str(before)
+
+        def _to_millis(value):
+            if isinstance(value, datetime):
+                return str(int(value.timestamp() * 1000))
+            if isinstance(value, (int, float)):
+                return str(int(value))
+            return str(value)
+
+        if begin:
+            params["begin"] = _to_millis(begin)
+        if end:
+            params["end"] = _to_millis(end)
+        if limit:
+            params["limit"] = str(int(limit))
         return self.request('GET', uri, params, auth=True)
 
     def get_fills(self, inst_type=None):
