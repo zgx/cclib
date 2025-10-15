@@ -540,6 +540,24 @@ class BinanceFApi(BinanceApiBase):
             params['incomeType'] = income_type
         return self.request('GET', uri, params, auth=True)
 
+    def get_force_orders(self, symbol=None, auto_close_type=None, start_time: datetime = None, end_time: datetime = None, limit: int = None):
+        """
+        查询用户强平订单记录。未指定auto_close_type时返回强平和ADL订单。
+        """
+        uri = "/fapi/v1/forceOrders"
+        params = {}
+        if symbol:
+            params['symbol'] = symbol
+        if auto_close_type:
+            params['autoCloseType'] = auto_close_type
+        if start_time:
+            params['startTime'] = int(start_time.timestamp() * 1000) if isinstance(start_time, datetime) else int(start_time)
+        if end_time:
+            params['endTime'] = int(end_time.timestamp() * 1000) if isinstance(end_time, datetime) else int(end_time)
+        if limit:
+            params['limit'] = int(limit)
+        return self.request('GET', uri, params, auth=True)
+
     # def get_multi_assets_margin(self):
     #     """
     #     查询用户目前在 所有symbol 合约上的联合保证金模式。
@@ -680,6 +698,24 @@ class BinanceDApi(BinanceApiBase):
             params['incomeType'] = income_type
         return self.request('GET', uri, params, auth=True)
 
+    def get_force_orders(self, symbol=None, auto_close_type=None, start_time: datetime = None, end_time: datetime = None, limit: int = None):
+        """
+        查询用户强平历史，未指定auto_close_type时返回强平和ADL订单。
+        """
+        uri = "/dapi/v1/forceOrders"
+        params = {}
+        if symbol:
+            params['symbol'] = symbol
+        if auto_close_type:
+            params['autoCloseType'] = auto_close_type
+        if start_time:
+            params['startTime'] = int(start_time.timestamp() * 1000) if isinstance(start_time, datetime) else int(start_time)
+        if end_time:
+            params['endTime'] = int(end_time.timestamp() * 1000) if isinstance(end_time, datetime) else int(end_time)
+        if limit:
+            params['limit'] = int(limit)
+        return self.request('GET', uri, params, auth=True)
+
 
 class BinancePApi(BinanceApiBase):
     """
@@ -797,4 +833,40 @@ class BinancePApi(BinanceApiBase):
         """
         uri = "/papi/v1/cm/account"
         return self.request("GET", uri, auth=True)
+
+    def get_um_force_orders(self, symbol=None, auto_close_type=None, start_time: datetime = None, end_time: datetime = None, limit: int = None):
+        """
+        统一账户查询U本位合约强平记录，未指定auto_close_type时返回强平和ADL订单。
+        """
+        uri = "/papi/v1/um/forceOrders"
+        params = {}
+        if symbol:
+            params['symbol'] = symbol
+        if auto_close_type:
+            params['autoCloseType'] = auto_close_type
+        if start_time:
+            params['startTime'] = int(start_time.timestamp() * 1000) if isinstance(start_time, datetime) else int(start_time)
+        if end_time:
+            params['endTime'] = int(end_time.timestamp() * 1000) if isinstance(end_time, datetime) else int(end_time)
+        if limit:
+            params['limit'] = int(limit)
+        return self.request("GET", uri, params, auth=True)
+
+    def get_cm_force_orders(self, symbol=None, auto_close_type=None, start_time: datetime = None, end_time: datetime = None, limit: int = None):
+        """
+        统一账户查询币本位合约强平记录，未指定auto_close_type时返回强平和ADL订单。
+        """
+        uri = "/papi/v1/cm/forceOrders"
+        params = {}
+        if symbol:
+            params['symbol'] = symbol
+        if auto_close_type:
+            params['autoCloseType'] = auto_close_type
+        if start_time:
+            params['startTime'] = int(start_time.timestamp() * 1000) if isinstance(start_time, datetime) else int(start_time)
+        if end_time:
+            params['endTime'] = int(end_time.timestamp() * 1000) if isinstance(end_time, datetime) else int(end_time)
+        if limit:
+            params['limit'] = int(limit)
+        return self.request("GET", uri, params, auth=True)
 
