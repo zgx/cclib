@@ -421,6 +421,14 @@ class OkexApi(OkexApiBase):
             params['ccy'] = ccy
         return self.request('GET', uri, params, auth=True)
 
+    def get_account_position_risk(self, inst_type=None):
+        """查看账户持仓风险数据。"""
+        uri = "/api/v5/account/account-position-risk"
+        params = {}
+        if inst_type:
+            params['instType'] = inst_type
+        return self.request('GET', uri, params, auth=True)
+
     def get_trade_fee(self, inst_type, inst_id=None, uly=None):
         """
         获取当前账户交易手续费费率
