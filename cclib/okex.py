@@ -739,19 +739,16 @@ class OkexApi(OkexApiBase):
             params["apr"] = apr
         return self.request("POST", uri, body=params, auth=True)
 
-    def set_auto_loan(self, auto_loan: bool, ccy: str = None):
+    def set_auto_loan(self, auto_loan: bool = True):
         """
-        设置自动借币功能。
-        :param auto_loan: 是否开启自动借币，true: 开启, false: 关闭
-        :param ccy: 币种，如 BTC。开启自动借币时必填，关闭时可选
+        设置自动借币功能。仅适用于跨币种保证金模式和组合保证金模式。
+        :param auto_loan: 是否自动借币，有效值为 true, false，默认为 true
         :return:
         """
         uri = "/api/v5/account/set-auto-loan"
         params = {
             "autoLoan": auto_loan
         }
-        if ccy:
-            params["ccy"] = ccy
         return self.request("POST", uri, body=params, auth=True)
 
     def set_position_mode(self, pos_mode: str):
