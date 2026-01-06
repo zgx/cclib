@@ -739,6 +739,39 @@ class OkexApi(OkexApiBase):
             params["apr"] = apr
         return self.request("POST", uri, body=params, auth=True)
 
+    def set_auto_loan(self, auto_loan: bool, ccy: str = None):
+        """
+        设置自动借币功能。
+        :param auto_loan: 是否开启自动借币，true: 开启, false: 关闭
+        :param ccy: 币种，如 BTC。开启自动借币时必填，关闭时可选
+        :return:
+        """
+        uri = "/api/v5/account/set-auto-loan"
+        params = {
+            "autoLoan": auto_loan
+        }
+        if ccy:
+            params["ccy"] = ccy
+        return self.request("POST", uri, body=params, auth=True)
+
+    def set_position_mode(self, pos_mode: str):
+        """
+        设置持仓模式。
+        合约模式和跨币种保证金模式：交割和永续合约支持开平仓模式和买卖模式。
+        买卖模式只会有一个方向的仓位；开平仓模式可以分别持有多、空2个方向的仓位。
+        组合保证金模式：交割和永续仅支持买卖模式。
+        :param pos_mode: 持仓方式
+            long_short_mode：开平仓模式
+            net_mode：买卖模式
+            仅适用交割/永续
+        :return:
+        """
+        uri = "/api/v5/account/set-position-mode"
+        params = {
+            "posMode": pos_mode
+        }
+        return self.request("POST", uri, body=params, auth=True)
+
 
 class OkexV3FuturesApi(OkexApiBase):
 
