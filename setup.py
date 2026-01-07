@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='cclib',
-    version='0.2.10',
+    version='0.2.11',
     description='cclib',
     author='zgx',
     url='https://github.com/zgx/cclib',

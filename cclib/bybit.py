@@ -109,7 +109,7 @@ class BybitV5Api:
             self.__session = http_session.get_session(self.base_url)
         super().__init__()
 
-    def request(self, method, uri, params=None, body="", headers=None, auth=False):
+    def request(self, method, uri, params=None, body="", headers=None, auth=False, recv_window=5000):
         if uri.startswith("https://") or uri.startswith("http://"):
             url = uri
         else:
@@ -132,13 +132,16 @@ class BybitV5Api:
             X-BAPI-API-KEY - API密鑰
             X-BAPI-TIMESTAMP - UTC毫秒時間戳
             X-BAPI-SIGN - 請求參數簽名
+            X-BAPI-RECV-WINDOW - 請求有效時間窗口（毫秒）
             X-Referer or Referer - 經紀商用戶專用的頭參數
             """
 
             timestamp = int(time.time() * 1000)
+            recv_window_str = str(recv_window)
             headers['X-BAPI-API-KEY'] = self._access_key
             headers['X-BAPI-TIMESTAMP'] = str(timestamp)
-            sign = self.generate_signature(method, timestamp, query_string, body)
+            headers['X-BAPI-RECV-WINDOW'] = recv_window_str
+            sign = self.generate_signature(method, timestamp, query_string, body, recv_window_str)
             headers['X-BAPI-SIGN'] = sign
 
         try:
@@ -184,17 +187,16 @@ class BybitV5Api:
         raise errors.ExchangeError(msg, code, status_code, payload=rsp_obj)
 
     def generate_signature(self, method, timestamp, query_string, body_string="", recv_window=""):
-        # 拼接規則. 
-        # GET timestamp+api_key+recv_window+queryString
-        # POST timestamp+api_key+recv_window+bodyString
+        # 拼接規則 (According to official V5 API documentation)
+        # GET: timestamp+api_key+recv_window+queryString
+        # POST: timestamp+api_key+recv_window+jsonBodyString
 
         if method == "GET":
             s = str(timestamp) + self._access_key + recv_window + query_string
         else:
-            s = str(timestamp) + self._access_key + body_string
+            # POST also needs recv_window according to official documentation
+            s = str(timestamp) + self._access_key + recv_window + body_string
 
-        # sorted_params = sorted(params.items(), key=lambda d: d[0], reverse=False)
-        # encode_params = urllib.parse.urlencode(sorted_params)
         sign = hmac.new(self._secret_key.encode(), s.encode(), digestmod=hashlib.sha256).hexdigest()
         return sign
     
@@ -271,71 +273,78 @@ class BybitV5Api:
             params['symbol'] = symbol
         return self.request('GET', uri, params)
 
-
-
-class BybitSpotApi(BaseBybitApi):
-
-    def get_symbols(self):
-        uri = "/spot/v1/symbols"
-        return self.request('GET', uri)
-
-    def get_candles(self, symbol, start_time: datetime.datetime, end_time: datetime.datetime, interval='1m', limit=1000):
+    def get_position_info(self, category, symbol=None, base_coin=None, settle_coin=None, limit=None, cursor=None):
         """
-        获取K线数据。
-        :param symbol:	Name of the trading pair
-        :param start_time:	Start time, 起始时间，在缺少endTime字段的情况是，此字段不起作用
-        :param end_time: End time, unit in millisecond
-        :param interval: candle interval. 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 12h, 1d, 1w, 1M
-        :param limit: Default value is 1000, max 1000
-        :return:
+        获取持仓信息
+        Query real-time position data, such as position size, cumulative realized PNL, etc.
+        
+        :param category: 产品类型. linear, inverse, option
+        :param symbol: 合约名称. 如果传入symbol，则返回数据无论是否有持仓
+        :param base_coin: Base coin. option only. 如果不传baseCoin, 则返回全部期权的持仓
+        :param settle_coin: Settle coin. 对于linear & inverse, settleCoin 或 symbol 必传一个. 如果都不传，默认返回 USDT perpetual
+        :param limit: 每页数量限制. [1, 200]. Default: 20
+        :param cursor: Cursor. Used for pagination
+        :return: Response object containing position information
         """
-        uri = "/spot/quote/v1/kline"
-        params = {'symbol': symbol, 'interval': interval}
-        if start_time is not None:
-            start_ts = int(start_time.timestamp() * 1000)
-            params['startTime'] = start_ts
-        if end_time is not None:
-            end_ts = int(end_time.timestamp() * 1000)
-            params['endTime'] = end_ts
+        uri = "/v5/position/list"
+        params = {'category': category}
+        if symbol:
+            params['symbol'] = symbol
+        if base_coin:
+            params['baseCoin'] = base_coin
+        if settle_coin:
+            params['settleCoin'] = settle_coin
         if limit is not None:
             params['limit'] = limit
-        return self.request('GET', uri, params)
-
-
-class BybitCoinSwapApi(BaseBybitApi):
-
-    def get_symbols(self):
-        uri = "/v2/public/symbols"
-        return self.request('GET', uri)
-
-    def get_tickers(self):
-        uri = "/v2/public/tickers"
-        return self.request('GET', uri)
-
-    def get_candles(self, symbol, start_time: datetime.datetime, interval="1", limit=200):
-        """
-
-        :param symbol:
-        :param start_time: 起始时间
-        :param limit:
-        :param interval: Data refresh interval. Enum : 1 3 5 15 30 60 120 240 360 720 "D" "M" "W"
-        :return:
-        """
-        uri = "/v2/public/kline/list"
-        from_ts = int(start_time.timestamp())
-        params = {'symbol': symbol, 'from': from_ts, 'interval': interval, 'limit': limit}
-        return self.request('GET', uri, params)
-
-    def get_balances(self, symbol=None):
-        uri = "/v2/private/wallet/balance"
-        params = {}
-        if symbol:
-            params['coin'] = symbol
+        if cursor:
+            params['cursor'] = cursor
         return self.request('GET', uri, params, auth=True)
 
-    def get_positions(self, symbol=None):
-        uri = "/v2/private/position/list"
-        params = {}
+    def set_leverage(self, category, symbol, buy_leverage, sell_leverage):
+        """
+        设置杠杆倍数
+        Set the leverage for a trading pair
+        
+        :param category: 产品类型. linear, inverse
+        :param symbol: 合约名称
+        :param buy_leverage: 买入杠杆. [0, max leverage of corresponding risk limit]. 
+                             注意: 在单向持仓模式下, buyLeverage必须等于sellLeverage
+        :param sell_leverage: 卖出杠杆. [0, max leverage of corresponding risk limit].
+                              注意: 在单向持仓模式下, buyLeverage必须等于sellLeverage
+        :return: Response object
+        """
+        uri = "/v5/position/set-leverage"
+        body = {
+            'category': category,
+            'symbol': symbol,
+            'buyLeverage': str(buy_leverage),
+            'sellLeverage': str(sell_leverage)
+        }
+        return self.request('POST', uri, body=body, auth=True)
+
+    def switch_position_mode(self, category, mode, symbol=None, coin=None):
+        """
+        切换持仓模式
+        Switch Position Mode. Supports switching the position mode for USDT perpetual and Inverse futures.
+        
+        :param category: 产品类型. linear, inverse
+        :param mode: 持仓模式. 0: 单向持仓 (one-way/merged single), 3: 双向持仓 (hedge mode/both sides)
+        :param symbol: 合约名称. symbol 或 coin 至少传一个. symbol优先级更高
+        :param coin: Coin name. symbol 或 coin 至少传一个
+        :return: Response object
+        
+        注意:
+        - 单向模式 (mode=0): 只能在买入或卖出方向开一个仓位
+        - 双向模式 (mode=3): 可以同时在买入和卖出方向开仓
+        - Linear perpetual 支持一键切换全仓模式 (通过传入coin参数)
+        """
+        uri = "/v5/position/switch-mode"
+        body = {
+            'category': category,
+            'mode': mode
+        }
         if symbol:
-            params['coin'] = symbol
-        return self.request('GET', uri, params, auth=True)
+            body['symbol'] = symbol
+        if coin:
+            body['coin'] = coin
+        return self.request('POST', uri, body=body, auth=True)
